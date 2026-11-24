@@ -1,0 +1,20 @@
+name: AbyssalDominionFoodEffects
+version: '1.2.0'
+main: com.abyssaldominion.foodeffects.AbyssalDominionFoodEffects
+api-version: '26.2'
+softdepend: [PlaceholderAPI]
+description: 'Adds, removes, or replaces potion effects granted by consumed items.'
+
+commands:
+  foodfx:
+    aliases: [abyssaldominionfoodeffects]
+    description: 'Abyssal Dominion Food Effects command'
+    usage: /<command> <reload|version>
+
+permissions:
+  abyssaldominion.foodeffects.reload:
+    description: 'Allows reloading the plugin configuration'
+    default: op
+  abyssaldominion.foodeffects.version:
+    description: 'Allows viewing the plugin version'
+    default: true

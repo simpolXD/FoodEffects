@@ -1,0 +1,97 @@
+settings:
+  # Master on/off switch. When false, the plugin does nothing.
+  enabled: true
+
+  # Maximum duration in seconds for any configured effect.
+  # This prevents accidental infinite or excessively long effects.
+  max-duration-seconds: 7200
+
+  # Maximum amplifier (0 = level I, 1 = level II, 2 = level III, etc.)
+  max-amplifier: 10
+
+  # Enable Persistent Data Container (PDC) matching for custom items.
+  # When true, entries in items: and custom-items: may use PDC requirements.
+  custom-item-matching: true
+
+# Configure items and their effect modifications.
+# Entries under items: are keyed by vanilla Material names.
+# Use custom-items: below for PDC-identified items; every configured PDC
+# key AND exact string value must match the consumed item.
+items:
+  # Example: Enchanted Golden Apple
+  ENCHANTED_GOLDEN_APPLE:
+    # remove-effects: effect types to suppress from this item's vanilla grants.
+    remove-effects: []
+
+    # replace-effects: map effect type -> replacement definition.
+    # The vanilla effect is cancelled; the replacement is applied once.
+    replace-effects:
+      REGENERATION:
+        duration: 30       # seconds
+        amplifier: 2       # 0 = level I
+        ambient: false
+        particles: true
+        icon: true
+
+    # add-effects: additional effects granted AFTER vanilla behavior completes.
+    add-effects: []
+
+  # Example: Golden Apple
+  GOLDEN_APPLE:
+    remove-effects: []
+    replace-effects: {}
+    add-effects:
+      SPEED:
+        duration: 15
+        amplifier: 1
+        ambient: false
+        particles: true
+        icon: true
+
+  # Example: Cooked Beef
+  COOKED_BEEF:
+    remove-effects: []
+    replace-effects: {}
+    add-effects:
+      STRENGTH:
+        duration: 5
+        amplifier: 0
+        ambient: false
+        particles: true
+        icon: true
+
+  # Example: Milk Bucket (clears effects in vanilla)
+  MILK_BUCKET:
+    remove-effects: []
+    replace-effects: {}
+    add-effects: []
+
+  # Example: Drinkable Potion
+  POTION:
+    remove-effects: []
+    replace-effects: {}
+    add-effects: []
+
+  # Example: Suspicious Stew
+  SUSPICIOUS_STEW:
+    remove-effects: []
+    replace-effects: {}
+    add-effects: []
+
+  # Example: Honey Bottle
+  HONEY_BOTTLE:
+    remove-effects: []
+    replace-effects: {}
+    add-effects: []
+
+# Optional custom-item rules are evaluated before generic material rules.
+# Each PDC requirement must match both its key and exact string value.
+custom-items:
+  super_apple:
+    material: APPLE
+    pdc:
+      "myplugin:itemid": "super_apple"
+    remove-effects: []
+    replace-effects: {}
+    add-effects: {}
+
