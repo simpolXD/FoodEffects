@@ -6,7 +6,7 @@ Configuration-driven potion effect additions, removals, and replacements for con
 
 - Paper 26.2 (build 135); the local server log identifies Minecraft 26.2.
 - The resolved build API is `io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT`; this is not a Paper 26.2 API artifact.
-- Plugin bytecode target: Java 21. The local server log reports Java 27.
+- Plugin bytecode target: Java 25.
 
 ## Installation
 

@@ -2,6 +2,7 @@ package com.abyssaldominion.foodeffects;
 
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
+import org.bukkit.Bukkit;
 import org.bukkit.potion.PotionEffectType;
 import org.junit.jupiter.api.Test;
 
@@ -55,6 +56,7 @@ class DurationConversionTest {
 
     private static PotionEffectType safeGetEffectType(String name) {
         try {
+            if (Bukkit.getServer() == null) return null;
             NamespacedKey key = NamespacedKey.fromString(name.toLowerCase(java.util.Locale.ROOT));
             return key == null ? null : Registry.MOB_EFFECT.get(key);
         } catch (Throwable t) {

@@ -2,6 +2,7 @@ package com.abyssaldominion.foodeffects;
 
 import com.abyssaldominion.foodeffects.config.EffectRule;
 import com.abyssaldominion.foodeffects.config.FoodRule;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
@@ -46,9 +47,7 @@ class EffectRuleTest {
 
     @Test
     void foodRuleHasAnyEffect() {
-        PotionEffectType speed = safeGetEffectType("speed");
-        assumeTrue(speed != null, "Paper effect registry is unavailable in this unit-test JVM");
-        EffectRule add = new EffectRule(speed, 100, 0, false, true, true);
+        EffectRule add = new EffectRule(null, 100, 0, false, true, true);
         FoodRule rule = new FoodRule(Material.GOLDEN_APPLE, "", List.of(),
             List.of(), Map.of(), List.of(add));
         assertTrue(rule.hasAnyEffect());
@@ -60,6 +59,7 @@ class EffectRuleTest {
 
     private static PotionEffectType safeGetEffectType(String name) {
         try {
+            if (Bukkit.getServer() == null) return null;
             NamespacedKey key = NamespacedKey.fromString(name.toLowerCase(java.util.Locale.ROOT));
             return key == null ? null : Registry.MOB_EFFECT.get(key);
         } catch (Throwable t) {

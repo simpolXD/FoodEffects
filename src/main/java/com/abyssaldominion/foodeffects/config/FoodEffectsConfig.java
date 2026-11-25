@@ -82,7 +82,7 @@ public class FoodEffectsConfig {
      * Returns the rule matching the given item, or null if none matches.
      */
     public FoodRule getRuleForItem(ItemStack item) {
-        if (item == null || item.getType().isAir()) {
+        if (item == null || ItemMatcher.isAirMaterial(item.getType())) {
             return null;
         }
 

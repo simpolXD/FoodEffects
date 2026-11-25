@@ -15,8 +15,13 @@ import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.Material;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Intercepts item consumption and potion-effect application to implement
@@ -34,6 +39,7 @@ public class FoodEffectsListener implements Listener {
     private final FoodEffectsConfig config;
     private final ConsumptionTracker tracker;
     private final java.util.logging.Logger logger;
+    private final Map<UUID, org.bukkit.scheduler.BukkitTask> pendingTasks = new HashMap<>();
 
     public FoodEffectsListener(AbyssalDominionFoodEffects plugin,
                                FoodEffectsConfig config,
@@ -47,13 +53,21 @@ public class FoodEffectsListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerItemConsume(@NotNull PlayerItemConsumeEvent event) {
-        if (!config.isEnabled()) {
+        if (!config.isEnabled() || event.isCancelled()) {
             return;
         }
 
         Player player = event.getPlayer();
+        UUID playerUuid = player.getUniqueId();
+        cancelPendingTask(playerUuid);
+        tracker.clear(playerUuid);
+
         ItemStack item = event.getItem();
-        if (item == null || item.getType().isAir()) {
+        if (item == null) {
+            return;
+        }
+        Material type = item.getType();
+        if (ItemMatcher.isAirMaterial(type)) {
             return;
         }
 
@@ -75,7 +89,12 @@ public class FoodEffectsListener implements Listener {
 
         // Schedule add-effects and replacements for the next server tick.
         // By then, all vanilla effect events for this consumption will have fired.
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> applyEffects(player, context), 1L);
+        org.bukkit.scheduler.BukkitTask[] taskHandle = new org.bukkit.scheduler.BukkitTask[1];
+        taskHandle[0] = plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            pendingTasks.remove(playerUuid, taskHandle[0]);
+            applyEffects(player, context);
+        }, 1L);
+        pendingTasks.put(playerUuid, taskHandle[0]);
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -140,19 +159,23 @@ public class FoodEffectsListener implements Listener {
 
     @EventHandler
     public void onPlayerQuit(@NotNull PlayerQuitEvent event) {
-        tracker.clear(event.getPlayer().getUniqueId());
+        UUID playerUuid = event.getPlayer().getUniqueId();
+        cancelPendingTask(playerUuid);
+        tracker.clear(playerUuid);
     }
 
     @EventHandler
     public void onPluginDisable(@NotNull PluginDisableEvent event) {
         if (event.getPlugin().equals(plugin)) {
+            pendingTasks.values().forEach(org.bukkit.scheduler.BukkitTask::cancel);
+            pendingTasks.clear();
             tracker.clearAll();
         }
     }
 
     private void applyEffects(Player player, ConsumptionTracker.ConsumptionContext context) {
         if (player == null || !player.isOnline()) {
-            tracker.clear(context.playerUuid());
+            tracker.consumeIfCurrent(context.playerUuid(), context);
             return;
         }
 
@@ -181,6 +204,13 @@ public class FoodEffectsListener implements Listener {
             if (!player.addPotionEffect(addEffect.toPotionEffect())) {
                 logger.fine(() -> "Add effect " + addEffect.type().getKey() + " was not applied to " + player.getName());
             }
+        }
+    }
+
+    private void cancelPendingTask(UUID playerUuid) {
+        org.bukkit.scheduler.BukkitTask task = pendingTasks.remove(playerUuid);
+        if (task != null) {
+            task.cancel();
         }
     }
 }

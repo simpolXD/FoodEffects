@@ -94,7 +94,9 @@ class FoodEffectsTransactionTest {
     }
     @Test void disableCancelsTasksAndPendingContexts() {
         listener.onPlayerItemConsume(event(false));
-        listener.onPluginDisable(new PluginDisableEvent(plugin));
+        var disable = mock(PluginDisableEvent.class);
+        when(disable.getPlugin()).thenReturn(plugin);
+        listener.onPluginDisable(disable);
         assertEquals(0, tracker.size()); verify(handles.getFirst()).cancel();
         tasks.getFirst().run(); verify(player, never()).addPotionEffect(any());
     }

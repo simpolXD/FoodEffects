@@ -1,6 +1,7 @@
 package com.abyssaldominion.foodeffects.matcher;
 
 import com.abyssaldominion.foodeffects.config.PdcRequirement;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -20,7 +21,7 @@ public final class ItemMatcher {
      * This does NOT match by display name or lore.
      */
     public static String detectCustomId(ItemStack item) {
-        if (item == null || item.getType().isAir()) {
+        if (item == null || isAirMaterial(item.getType())) {
             return "";
         }
         ItemMeta meta = item.getItemMeta();
@@ -53,7 +54,7 @@ public final class ItemMatcher {
         if (requirements == null || requirements.isEmpty()) {
             return true;
         }
-        if (item == null || item.getType().isAir()) {
+        if (item == null || isAirMaterial(item.getType())) {
             return false;
         }
         ItemMeta meta = item.getItemMeta();
@@ -78,7 +79,15 @@ public final class ItemMatcher {
         if (item == null) {
             return ItemSnapshot.EMPTY;
         }
+
         return new ItemSnapshot(item.getType(), detectCustomId(item));
+    }
+
+    public static boolean isAirMaterial(Material material) {
+        return material == null
+            || material == Material.AIR
+            || material == Material.CAVE_AIR
+            || material == Material.VOID_AIR;
     }
 
     public record ItemSnapshot(
@@ -88,7 +97,7 @@ public final class ItemMatcher {
         public static final ItemSnapshot EMPTY = new ItemSnapshot(org.bukkit.Material.AIR, "");
 
         public boolean isAir() {
-            return material == null || material.isAir();
+            return ItemMatcher.isAirMaterial(material);
         }
     }
 }
